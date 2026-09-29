@@ -221,29 +221,25 @@ export default function PrimasPage() {
                         {COBERTURAS.map(cob => {
                           const val = getValue(tipo.key, cob.key, ambito);
                           const key = `${tipo.key}:${cob.key}:${ambito}`;
-                          const exists = key in primaMap || val !== '';
                           const adjVal = val !== '' && adjPct !== 0
                             ? Math.round(Number(val) * (1 + adjPct / 100))
                             : null;
                           return (
                             <td key={cob.key} style={{ ...tdStyle, textAlign: 'right' }}>
-                              {exists ? (
-                                <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-                                  <input
-                                    type="number"
-                                    value={val}
-                                    onChange={e => onChange(tipo.key, cob.key, ambito, e.target.value)}
-                                    style={cellStyle(key in edited)}
-                                  />
-                                  {adjVal !== null && (
-                                    <span style={{ fontSize: 10, color: adjPct > 0 ? '#34d399' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
-                                      → {adjVal}
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <span style={{ color: 'var(--dim)', fontSize: 12 }}>—</span>
-                              )}
+                              <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                                <input
+                                  type="number"
+                                  value={val}
+                                  onChange={e => onChange(tipo.key, cob.key, ambito, e.target.value)}
+                                  style={cellStyle(key in edited)}
+                                  placeholder="—"
+                                />
+                                {adjVal !== null && (
+                                  <span style={{ fontSize: 10, color: adjPct > 0 ? '#34d399' : '#f87171', fontVariantNumeric: 'tabular-nums' }}>
+                                    → {adjVal}
+                                  </span>
+                                )}
+                              </div>
                             </td>
                           );
                         })}
