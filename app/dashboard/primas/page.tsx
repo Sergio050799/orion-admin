@@ -41,7 +41,8 @@ const cellStyle = (edited: boolean): React.CSSProperties => ({
   textAlign: 'right',
   outline: 'none',
   fontVariantNumeric: 'tabular-nums',
-});
+  MozAppearance: 'textfield',
+} as React.CSSProperties);
 
 export default function PrimasPage() {
   const [primaMap, setPrimaMap] = useState<PrimaMap>({});
@@ -136,16 +137,37 @@ export default function PrimasPage() {
           <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>Edita los valores y guarda. Orion los leerá automáticamente.</div>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          {msg && <span style={{ fontSize: 12, color: msg.startsWith('Error') ? '#f87171' : 'var(--muted)' }}>{msg}</span>}
-          {totalChanges > 0 && (
-            <button onClick={saveAll} disabled={saving} style={{
-              background: 'var(--text)', color: 'var(--bg)', border: 'none',
-              borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600,
-              cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.5 : 1,
+          {msg && <span style={{ fontSize: 12, color: msg.startsWith('Error') ? '#f87171' : '#6ee7b7' }}>{msg}</span>}
+          <button
+            onClick={() => {
+              if (window.confirm('¿Restablecer todos los valores a los guardados actualmente? Se perderán los cambios no guardados.')) {
+                load();
+              }
+            }}
+            style={{
+              background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
+              borderRadius: 6, padding: '8px 16px', fontSize: 13, fontWeight: 500,
+              cursor: 'pointer',
             }}>
-              {saving ? 'Guardando...' : `Guardar (${totalChanges})`}
-            </button>
-          )}
+            Restablecer
+          </button>
+          <button
+            onClick={() => {
+              if (totalChanges === 0) return;
+              if (window.confirm(`¿Actualizar ${totalChanges} valor${totalChanges !== 1 ? 'es' : ''}? Los cambios se aplicarán en Orion inmediatamente.`)) {
+                saveAll();
+              }
+            }}
+            disabled={saving}
+            style={{
+              background: totalChanges > 0 ? 'var(--text)' : 'var(--surface2)',
+              color: totalChanges > 0 ? 'var(--bg)' : 'var(--dim)',
+              border: 'none', borderRadius: 6, padding: '8px 18px', fontSize: 13, fontWeight: 600,
+              cursor: saving || totalChanges === 0 ? 'not-allowed' : 'pointer',
+              opacity: saving ? 0.5 : 1,
+            }}>
+            {saving ? 'Actualizando...' : totalChanges > 0 ? `Actualizar primas (${totalChanges})` : 'Actualizar primas'}
+          </button>
         </div>
       </div>
 
@@ -175,21 +197,13 @@ export default function PrimasPage() {
               <div style={{ fontSize: 12, color: 'var(--dim)' }}>Se aplica sobre el total calculado en Orion</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-              <button onClick={() => setAjEdited(p => ({ ...p, ajuste_global_pct: Math.round((adjPct - 1) * 10) / 10 }))}
-                style={{ width: 28, height: 28, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 5, color: 'var(--text)', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>
-                −
-              </button>
               <input
-                type="number" step="0.5"
+                type="text" inputMode="decimal"
                 value={adjPct}
-                onChange={e => setAjEdited(p => ({ ...p, ajuste_global_pct: Number(e.target.value) }))}
+                onChange={e => { const v = e.target.value; if (v === '' || /^-?\d*\.?\d*$/.test(v)) setAjEdited(p => ({ ...p, ajuste_global_pct: Number(v) || 0 })); }}
                 style={{ width: 64, textAlign: 'center', background: 'var(--surface2)', border: `1px solid ${'ajuste_global_pct' in ajEdited ? 'rgba(255,255,255,0.2)' : 'var(--border)'}`, borderRadius: 5, padding: '5px 8px', fontSize: 14, fontWeight: 600, color: 'var(--text)', outline: 'none' }}
               />
               <span style={{ fontSize: 13, color: 'var(--muted)' }}>%</span>
-              <button onClick={() => setAjEdited(p => ({ ...p, ajuste_global_pct: Math.round((adjPct + 1) * 10) / 10 }))}
-                style={{ width: 28, height: 28, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 5, color: 'var(--text)', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>
-                +
-              </button>
               {adjPct !== 0 && (
                 <span style={{ fontSize: 12, color: adjPct > 0 ? '#34d399' : '#f87171', marginLeft: 4 }}>
                   {adjPct > 0 ? `+${adjPct}%` : `${adjPct}%`} sobre todas las primas
@@ -217,7 +231,7 @@ export default function PrimasPage() {
                   <tbody>
                     {TIPOS.map(tipo => (
                       <tr key={tipo.key}>
-                        <td style={{ ...tdStyle, color: 'var(--muted)', fontSize: 12, paddingRight: 20, whiteSpace: 'nowrap' }}>{tipo.label}</td>
+                        <td style={{ ...tdStyle, color: 'var(--text)', fontSize: 12, paddingRight: 20, whiteSpace: 'nowrap' }}>{tipo.label}</td>
                         {COBERTURAS.map(cob => {
                           const val = getValue(tipo.key, cob.key, ambito);
                           const key = `${tipo.key}:${cob.key}:${ambito}`;
@@ -228,9 +242,9 @@ export default function PrimasPage() {
                             <td key={cob.key} style={{ ...tdStyle, textAlign: 'right' }}>
                               <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
                                 <input
-                                  type="number"
+                                  type="text" inputMode="decimal"
                                   value={val}
-                                  onChange={e => onChange(tipo.key, cob.key, ambito, e.target.value)}
+                                  onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) onChange(tipo.key, cob.key, ambito, v); }}
                                   style={cellStyle(key in edited)}
                                   placeholder="—"
                                 />
@@ -279,10 +293,9 @@ export default function PrimasPage() {
                       <td style={{ padding: '8px 20px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <input
-                            type="number"
-                            step={isPct ? '0.01' : '1'}
+                            type="text" inputMode="decimal"
                             value={val}
-                            onChange={e => setAjEdited(prev => ({ ...prev, [aj.clave]: Number(e.target.value) }))}
+                            onChange={e => { const v = e.target.value; if (v === '' || /^-?\d*\.?\d*$/.test(v)) setAjEdited(prev => ({ ...prev, [aj.clave]: Number(v) || 0 })); }}
                             style={cellStyle(aj.clave in ajEdited)}
                           />
                           <span style={{ fontSize: 11, color: 'var(--muted)' }}>{isPct ? '%' : '€'}</span>
