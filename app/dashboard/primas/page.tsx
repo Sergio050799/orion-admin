@@ -51,7 +51,8 @@ export default function PrimasPage() {
   const [ajEdited, setAjEdited] = useState<Record<string, number>>({});
   const [saving,   setSaving]   = useState(false);
   const [msg,      setMsg]      = useState('');
-  const [tab,      setTab]      = useState<'primas' | 'ajustes'>('primas');
+  const [tab,         setTab]         = useState<'primas' | 'ajustes'>('primas');
+  const [adjPctInput, setAdjPctInput] = useState<string>('');
 
   const globalPct = (): number => {
     if ('ajuste_global_pct' in ajEdited) return ajEdited['ajuste_global_pct'];
@@ -199,8 +200,17 @@ export default function PrimasPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
               <input
                 type="text" inputMode="decimal"
-                value={adjPct}
-                onChange={e => { const v = e.target.value; if (v === '' || /^-?\d*\.?\d*$/.test(v)) setAjEdited(p => ({ ...p, ajuste_global_pct: Number(v) || 0 })); }}
+                value={adjPctInput !== '' ? adjPctInput : String(adjPct)}
+                onChange={e => {
+                  const v = e.target.value;
+                  if (v === '' || v === '-' || /^-?\d*\.?\d*$/.test(v)) {
+                    setAdjPctInput(v);
+                    const n = parseFloat(v);
+                    if (!isNaN(n)) setAjEdited(p => ({ ...p, ajuste_global_pct: n }));
+                    else if (v === '') setAjEdited(p => ({ ...p, ajuste_global_pct: 0 }));
+                  }
+                }}
+                onBlur={() => setAdjPctInput('')}
                 style={{ width: 64, textAlign: 'center', background: 'var(--surface2)', border: `1px solid ${'ajuste_global_pct' in ajEdited ? 'rgba(255,255,255,0.2)' : 'var(--border)'}`, borderRadius: 5, padding: '5px 8px', fontSize: 14, fontWeight: 600, color: 'var(--text)', outline: 'none' }}
               />
               <span style={{ fontSize: 13, color: 'var(--muted)' }}>%</span>
