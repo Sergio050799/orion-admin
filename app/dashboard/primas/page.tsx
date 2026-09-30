@@ -200,7 +200,7 @@ export default function PrimasPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
               <input
                 type="text" inputMode="decimal"
-                value={adjPctInput !== '' ? adjPctInput : String(adjPct)}
+                value={adjPctInput !== '' ? adjPctInput : (adjPct === 0 ? '' : String(adjPct))}
                 onChange={e => {
                   const v = e.target.value;
                   if (v === '' || v === '-' || /^-?\d*\.?\d*$/.test(v)) {
