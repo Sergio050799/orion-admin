@@ -5,7 +5,11 @@ import type { PrimaRow, AjusteRow } from '@/lib/api';
 
 const TIPOS = [
   { key: 'turismo',                   label: 'Turismo' },
+  { key: 'derivado_turismo',           label: 'Derivado de Turismo' },
+  { key: 'derivado_todoterreno',       label: 'Derivado de Todoterreno' },
   { key: 'furgoneta',                  label: 'Furgoneta' },
+  { key: 'furgon',                     label: 'Furgón' },
+  { key: 'moto',                       label: 'Moto' },
   { key: 'cabeza_tractora',            label: 'Cabeza Tractora' },
   { key: 'camion_rigido',              label: 'Camión Rígido' },
   { key: 'semirremolque',              label: 'Semirremolque' },
